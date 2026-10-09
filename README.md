@@ -1,5 +1,3 @@
-#Lab2
-
 [![Build](https://github.com/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios/actions/workflows/build.yml/badge.svg)](https://github.com/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios&metric=alert_status)](https://sonarcloud.io/project/overview?id=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios&metric=coverage)](https://sonarcloud.io/project/overview?id=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
@@ -7,16 +5,20 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios&metric=sqale_index)](https://sonarcloud.io/project/overview?id=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios&metric=reliability_rating)](https://sonarcloud.io/project/overview?id=JuanjEC_JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
 [![Snyk](https://snyk.io/test/github/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios/badge.svg)](https://snyk.io/test/github/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
+[![Known Vulnerabilities](https://snyk.io/test/github/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios/badge.svg)](https://snyk.io/test/github/JuanjEC/JuanJeronimoEcheverry-ArqdeSoft-Laboratorios)
 [![Docker Image](https://img.shields.io/badge/Docker-banco%3Alatest-blue?logo=docker)](https://hub.docker.com/r/JuanjEC/banco)
 [![Deploy on Render](https://img.shields.io/badge/Render-Deployed-46E3B7?logo=render&logoColor=black)](https://render.com/)
 
+# Laboratorios 1 y 2
+En el laboratorio 1 creé el frontend que consume la API que se le indique y se le realizaron pruebas con Postman en localhost, en el laboratorio 2 también hice pruebas con postman y con el frontend consumiendo la API de Render.
+
 # Banco UdeA
 
-Spring Boot REST API for customers and money transfers, with a React frontend in `banco-frontend`.
+Spring Boot REST API para clientes y transferencias de dinero, con un frontend en React en `banco-frontend`.
 
 ## Documentacion
 
-El paso a paso del laboratorio, con las evidencias del pipeline y del despliegue, está en [PASOS_SEGUIDOS.md](PASOS_SEGUIDOS.md).
+El paso a paso del laboratorio 2, con las evidencias del pipeline, el uso del frontend y del despliegue, están en [PASOS_SEGUIDOS.md](PASOS_SEGUIDOS.md).
 
 ## Despliegue
 
