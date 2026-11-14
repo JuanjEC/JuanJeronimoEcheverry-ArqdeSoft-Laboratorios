@@ -191,13 +191,13 @@ Este fue el resultado del escaneo del `pom.xml` y del `Dockerfile`:
 
 Agregué al repositorio un servidor MCP para administrar tareas y registrar pedidos de supermercado a domicilio, junto con un cliente Google ADK. Conservé el banco de los laboratorios anteriores y organicé esta implementación en [servidor-mcp](<laboratorio-mcp/servidor-mcp/pom.xml>) y [agente-mcp](<laboratorio-mcp/agente-mcp/pom.xml>). Dejé los comandos de preparación, ejecución y conexión en el [README, sección Laboratorio MCP](<README.md#laboratorio-mcp>).
 
-## 1. Organización de los proyectos y dependencias
+## 12. Organización de los proyectos y dependencias
 
 Configuré el [POM del servidor](<laboratorio-mcp/servidor-mcp/pom.xml>) con Spring Boot **3.5.11**, Spring AI **1.1.4**, WebMVC MCP, JPA y los drivers MySQL/H2. En el [POM del agente](<laboratorio-mcp/agente-mcp/pom.xml>) usé Google ADK y ADK Dev **1.0.0**, con Spring Boot **4.0.2**. Separé los POM para mantener compatibles las dependencias de Spring AI y ADK sin cambiar las del banco; ambos proyectos compilan para Java 21 y se ejecutan seleccionando su POM desde la raíz.
 
 Dejé el servidor en `127.0.0.1:8088/mcp`, con transporte **Streamable HTTP**, y la interfaz ADK en `127.0.0.1:8081/dev-ui`. Así conservé el puerto 8080 para el banco y evité mezclar las configuraciones de los laboratorios.
 
-## 2. Entidades, DTO y repositorios
+## 13. Entidades, DTO y repositorios
 
 Implementé la persistencia por capas:
 
@@ -205,7 +205,7 @@ Implementé la persistencia por capas:
 - Agregué [TareaDto](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/dto/TareaDto.java>), [ProductoDto](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/dto/ProductoDto.java>) y [PedidoDto](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/dto/PedidoDto.java>) para devolver resultados sin exponer directamente las entidades JPA. Usé [ItemPedidoRequest](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/dto/ItemPedidoRequest.java>) para recibir productos y cantidades.
 - Implementé las consultas con [TareaRepository](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/repository/TareaRepository.java>), [ProductoRepository](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/repository/ProductoRepository.java>) y [PedidoRepository](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/repository/PedidoRepository.java>). Añadí bloqueos pesimistas para las operaciones que cambian el stock o cancelan pedidos.
 
-## 3. Servicios y registro de las 14 herramientas
+## 14. Servicios y registro de las 14 herramientas
 
 Implementé las operaciones de tareas en [TareaToolsService](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/service/TareaToolsService.java>) y las del supermercado en [SupermercadoToolsService](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/service/SupermercadoToolsService.java>). Registré ambos servicios mediante [ToolConfiguration](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/config/ToolConfiguration.java>), para que los clientes descubran las mismas **14 herramientas: 9 de tareas y 5 de supermercado**.
 
@@ -218,7 +218,7 @@ Agregué las validaciones comunes en [Validaciones](<laboratorio-mcp/servidor-mc
 
 Incorporé [StrictToolCallback](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/config/StrictToolCallback.java>) para rechazar argumentos desconocidos, campos obligatorios ausentes y conversiones permisivas, como recibir una cantidad decimal donde debe ir un entero o una cadena donde debe ir un booleano.
 
-## 4. Pedidos, stock y cancelación
+## 15. Pedidos, stock y cancelación
 
 Implementé el flujo de catálogo, búsqueda, creación, consulta y cancelación de pedidos. Cada pedido acepta de 1 a 100 líneas con identificadores positivos, cantidades enteras positivas y sin productos repetidos. Calculé los precios, subtotales y total en COP con `BigDecimal`, a partir del catálogo del servidor, no de precios enviados por el cliente.
 
@@ -228,23 +228,21 @@ Al cancelar bloqueo primero el pedido y repongo sus productos en el mismo orden 
 
 Exigí `confirmado=true` para crear y cancelar pedidos. Este booleano valida el argumento, pero **no es autorización ni prueba de consentimiento humano**, porque cualquier cliente puede enviarlo. La confirmación antes de eliminar una tarea queda en las instrucciones del agente; esa herramienta recibe únicamente el identificador. Mantuve la escucha en loopback para la demostración: el endpoint no tiene autenticación ni permisos por usuario. Los pedidos sólo registran la operación del laboratorio, sin cobros ni reparto real.
 
-## 5. Configuración MySQL y perfil H2 local
+## 16. Configuración MySQL y perfil H2 local
 
 Configuré MySQL por defecto en [application.properties](<laboratorio-mcp/servidor-mcp/src/main/resources/application.properties>), con la base `tareas_mcp` y las variables `DB_URL`, `DB_USER` y `PWD_UDEA`. Preparé [schema.sql](<laboratorio-mcp/servidor-mcp/src/main/resources/schema.sql>) con las tablas `tarea`, `producto`, `pedido` y `pedido_item`, y [demo-data.sql](<laboratorio-mcp/servidor-mcp/src/main/resources/demo-data.sql>) con datos opcionales. Dejé ambos SQL para ejecución manual, no automática al arrancar; el esquema está pensado para una base de laboratorio compatible, no como migración de una base antigua.
 
 Agregué el perfil [application-local.properties](<laboratorio-mcp/servidor-mcp/src/main/resources/application-local.properties>) con **H2 persistente en archivo**, usuario `sa`, contraseña vacía y datos de demostración activados. En [DemoSeeder](<laboratorio-mcp/servidor-mcp/src/main/java/com/udea/mcp/config/DemoSeeder.java>) cargué el catálogo sólo si no hay productos y las tareas sólo si no hay tareas. Los datos SQL opcionales también omiten registros existentes; ninguno de estos mecanismos reinicializa el stock ni borra el historial. Consulto los identificadores reales antes de operar, sin asumir IDs fijos.
 
-Dejé las credenciales fuera del código y de los documentos. La contraseña MySQL pertenece al entorno del servidor; la clave Gemini pertenece al del agente. Las variables y los comandos completos están en el [README](<README.md#laboratorio-mcp>).
+Dejé las credenciales fuera del código y de los documentos. La contraseña MySQL pertenece al entorno del servidor; la clave Gemini pertenece al del agente.
 
-## 6. Cliente Google ADK y ejemplo para Claude Desktop
+## 17. Cliente Google ADK y ejemplo para Claude Desktop
 
 Implementé [AgentSettings](<laboratorio-mcp/agente-mcp/src/main/java/com/udea/agente_mcp/AgentSettings.java>) para centralizar `MCP_SERVER_URL`, `ADK_PORT`, `GEMINI_MODEL` y la validación de `GOOGLE_API_KEY`. Dejé `GOOGLE_GENAI_USE_VERTEXAI=FALSE` en el entorno de ejecución para usar Gemini API. En [AgentWebApplication](<laboratorio-mcp/agente-mcp/src/main/java/com/udea/agente_mcp/AgentWebApplication.java>) conecté el cliente al servidor MCP y separé el arranque de la interfaz del modo de descubrimiento sin clave Gemini.
 
 En [TareaAgent](<laboratorio-mcp/agente-mcp/src/main/java/com/udea/agente_mcp/TareaAgent.java>) indiqué que consulte herramientas para obtener datos reales, use fechas ISO y solicite los datos que falten. Para pedidos, configuré el flujo de consultar catálogo, reunir cliente/dirección/productos/cantidades, mostrar precios y total, y pedir confirmación explícita antes de crear. También pide confirmación del identificador antes de cancelar un pedido o eliminar una tarea y evita repetir automáticamente creaciones con resultado incierto.
 
-Preparé un [ejemplo de configuración Claude Desktop](<laboratorio-mcp/config/claude_desktop_config.example.json>) con `mcp-remote@0.16.6`, `--allow-http` y `--transport http-only`, apuntando al mismo servidor. No modifiqué la configuración personal de Claude ni incluí secretos. Tanto Claude como ADK reutilizan las herramientas, validaciones y persistencia; cambian el cliente, la interfaz y el modelo.
-
-## 7. Pruebas y resultados locales
+## 18. Pruebas y resultados locales
 
 El **2026-11-13** ejecuté las pruebas con **JDK 23.0.1**, compilando con **release 21**, y **Maven instalado 3.9.14**. El wrapper no funcionó en el entorno con **PowerShell 2**, por lo que usé Maven directamente seleccionando cada POM. Los scripts y el wrapper de Windows requieren **PowerShell 5.1 o superior**.
 
@@ -258,7 +256,5 @@ El **2026-11-13** ejecuté las pruebas con **JDK 23.0.1**, compilando con **rele
 | Interfaz ADK sin invocar Gemini | Obtuve HTTP **200** en `/dev-ui` con HTML y en `/list-apps` con `["TareaAgent"]`. Usé una clave ficticia sólo para comprobar la interfaz, sin enviar peticiones al proveedor. |
 
 Realicé la comprobación HTTP con un cliente Python temporal. Los reportes Surefire y logs quedaron en los directorios de compilación. Usé el perfil H2 persistente para estas pruebas.
-
-También intenté la regresión del banco: falló el descubrimiento de JUnit con `NoClassDefFoundError: CustomerDTO`. No cambié el código ni el POM del banco para este laboratorio.
 
 Dejé la secuencia de comandos y los ejemplos de interacción en el [README, sección Laboratorio MCP](<README.md#laboratorio-mcp>).

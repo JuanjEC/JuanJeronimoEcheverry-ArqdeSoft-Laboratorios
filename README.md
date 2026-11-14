@@ -135,7 +135,7 @@ Para crear un pedido uso `cliente`, `direccion`, `items: [{productoId, cantidad}
 
 ### Variables y credenciales
 
-Dejé las credenciales en variables de entorno. No agregué carga automática de `.env` ni claves al código.
+Dejé las credenciales en variables de entorno.
 
 | Variable | Componente | Configuración |
 |---|---|---|
@@ -148,72 +148,6 @@ Dejé las credenciales en variables de entorno. No agregué carga automática de
 | `GEMINI_MODEL` | Agente | Por defecto: `gemini-2.5-flash`, según acceso y cuota |
 | `MCP_SERVER_URL` | Agente | Por defecto: `http://127.0.0.1:8088/mcp` |
 | `ADK_PORT` | Agente | Por defecto: `8081` |
-
-Para ejecutar en mi computador, defino cada variable en la terminal que inicia el componente. En Codespaces uso un secret `GOOGLE_API_KEY` con acceso al repositorio; los secrets de Actions no se transfieren a Codespaces. El [workflow MCP](<.github/workflows/laboratorio-mcp.yml>) sólo ejecuta pruebas con H2 y no necesita secretos.
-
-### Preparación en GitHub Codespaces
-
-1. Publico la rama `feature/laboratorio-mcp` y la selecciono en GitHub.
-2. Creo el secret personal de Codespaces `GOOGLE_API_KEY` y doy acceso al repositorio.
-3. Abro **Code → Codespaces → Create codespace** para esa rama. La configuración prepara Java 21; uso Maven Wrapper desde la raíz.
-4. Ejecuto las pruebas, inicio el servidor con el perfil `local` y arranco el agente en otra terminal.
-5. Abro el puerto 8081 desde **Ports**, con visibilidad **Private**, y añado `/dev-ui` a la URL reenviada.
-6. Al terminar, detengo los procesos y el Codespace para limitar el consumo de cuota.
-
-### Pruebas y arranque sin MySQL
-
-En Linux o en un Codespace con Java 21 disponible:
-
-```bash
-bash ./mvnw -f laboratorio-mcp/servidor-mcp/pom.xml clean verify
-bash ./mvnw -f laboratorio-mcp/agente-mcp/pom.xml clean verify
-
-# Terminal 1: servidor con H2 persistente y datos de demostración
-bash ./mvnw -f laboratorio-mcp/servidor-mcp/pom.xml spring-boot:run -Dspring-boot.run.profiles=local
-
-# Terminal 2: descubrimiento de herramientas, sin clave Gemini
-bash ./mvnw -f laboratorio-mcp/agente-mcp/pom.xml compile exec:java@checkMcp
-```
-
-El [perfil local](<laboratorio-mcp/servidor-mcp/src/main/resources/application-local.properties>) guarda H2 en `./data/supermercado`, relativo al proceso del servidor. El inicializador agrega cuatro productos si el catálogo está vacío y tres tareas si no hay tareas. No borra datos ni restaura inventario al reiniciar.
-
-En PowerShell:
-
-```powershell
-.\mvnw.cmd -f laboratorio-mcp/servidor-mcp/pom.xml clean verify
-.\mvnw.cmd -f laboratorio-mcp/agente-mcp/pom.xml clean verify
-
-# Terminal 1
-.\laboratorio-mcp\scripts\start-server.ps1 -Local
-
-# Terminal 2
-.\laboratorio-mcp\scripts\test-mcp.ps1
-.\laboratorio-mcp\scripts\start-agent.ps1 -CheckMcp
-```
-
-El [script de prueba MCP](<laboratorio-mcp/scripts/test-mcp.ps1>) comprueba negociación, listado y lecturas. Con `-WriteDemo` también crea, actualiza, completa y elimina una tarea, y crea, consulta y cancela un pedido sintético. El pedido cancelado permanece en el historial. Uso esa opción sólo con datos de prueba y un producto con stock.
-
-El wrapper de Windows no funciona con PowerShell 2. En ese caso necesito actualizar PowerShell o usar Maven instalado con los mismos argumentos `-f`.
-
-### Arranque con MySQL
-
-Preparé el [esquema SQL](<laboratorio-mcp/servidor-mcp/src/main/resources/schema.sql>) y los [datos de demostración](<laboratorio-mcp/servidor-mcp/src/main/resources/demo-data.sql>). Los ejecuto manualmente; el servidor no ejecuta SQL de inicialización al arrancar. El esquema crea las tablas sin borrar registros y no migra estructuras antiguas.
-
-```powershell
-$schema = (Resolve-Path .\laboratorio-mcp\servidor-mcp\src\main\resources\schema.sql).Path.Replace('\', '/')
-mysql -u root -p -e "source $schema"
-
-# Opcional
-$demo = (Resolve-Path .\laboratorio-mcp\servidor-mcp\src\main\resources\demo-data.sql).Path.Replace('\', '/')
-mysql -u root -p -e "source $demo"
-
-$env:DB_USER = 'root'
-$secret = Read-Host 'Contraseña MySQL' -AsSecureString
-$env:PWD_UDEA = [System.Net.NetworkCredential]::new('', $secret).Password
-.\laboratorio-mcp\scripts\start-server.ps1
-```
-
-Para cargar datos desde la aplicación en vez del SQL demo, uso `start-server.ps1 -Demo`. La URL MySQL predeterminada desactiva TLS y está pensada para el laboratorio local. Uso sólo una instancia MCP a la vez en el puerto 8088.
 
 ### Chatbot ADK/Gemini
 
@@ -234,34 +168,6 @@ bash ./mvnw -f laboratorio-mcp/agente-mcp/pom.xml compile exec:java@runAdkWebSer
 ```
 
 Abro `http://127.0.0.1:8081/dev-ui` y selecciono `TareaAgent`. En Codespaces abro el puerto 8081 desde **Ports**, con visibilidad **Private**, y uso la URL reenviada con `/dev-ui`. El agente sigue conectándose internamente a `127.0.0.1:8088/mcp`; no necesito publicar el puerto MCP. Agregué la [configuración de Codespaces](<.devcontainer/devcontainer.json>) con Java 21 y reenvío del puerto de la interfaz; mantengo su visibilidad en **Private**.
-
-### Claude Desktop e Inspector
-
-Preparé un [ejemplo de configuración de Claude](<laboratorio-mcp/config/claude_desktop_config.example.json>) con un puente STDIO a HTTP. Para usarlo, incorporo el bloque en la configuración de desarrollador de Claude sin borrar otros servidores y reinicio la aplicación por completo. Si no encuentra `npx`, uso la ruta absoluta de `npx.cmd`. Claude no necesita la clave Gemini ni la contraseña MySQL.
-
-Para Inspector ejecuto `npx -y @modelcontextprotocol/inspector`, selecciono **Streamable HTTP** y conecto a `http://127.0.0.1:8088/mcp`.
-
-### Recorrido para capturas
-
-1. Consultar tareas pendientes y completadas; crear una tarea con fecha `2026-11-20`, actualizarla y completarla.
-2. Consultar catálogo, IDs, precios y stock inicial.
-3. Solicitar un pedido con nombre y dirección ficticios; mostrar el resumen antes de confirmarlo.
-4. Confirmar la creación y consultar el pedido con el ID devuelto.
-5. Volver a consultar el stock para comprobar el descuento.
-6. Solicitar y confirmar la cancelación del pedido; comprobar estado `CANCELADO` y reposición.
-7. Repetir la cancelación y verificar que el stock no aumenta otra vez.
-8. Probar fecha inválida, cantidad cero, producto inexistente y falta de stock.
-
-En MySQL puedo comprobar los resultados con estas consultas:
-
-```sql
-USE tareas_mcp;
-SELECT id, titulo, fecha, completado FROM tarea ORDER BY id;
-SELECT id, nombre, precio, stock FROM producto ORDER BY id;
-SELECT id, cliente, direccion, estado, total FROM pedido ORDER BY id;
-SELECT pedido_id, producto_id, nombre, cantidad, precio_unitario, subtotal
-FROM pedido_item ORDER BY pedido_id, producto_id;
-```
 
 ### Resultados y seguridad
 
