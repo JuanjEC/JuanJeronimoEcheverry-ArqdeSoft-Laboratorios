@@ -1,0 +1,11 @@
+{
+  "name": "Laboratorios de Arquitectura - MCP",
+  "image": "mcr.microsoft.com/devcontainers/java:21-bookworm",
+  "forwardPorts": [8081],
+  "portsAttributes": {
+    "8081": {
+      "label": "Chatbot ADK",
+      "onAutoForward": "notify"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+name: Laboratorio MCP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'laboratorio-mcp/**'
+      - '.github/workflows/laboratorio-mcp.yml'
+  pull_request:
+    paths:
+      - 'laboratorio-mcp/**'
+      - '.github/workflows/laboratorio-mcp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [servidor-mcp, agente-mcp]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Tests sin secretos ni servicios externos
+        run: mvn -B -f laboratorio-mcp/${{ matrix.project }}/pom.xml verify
+      - name: Publicar resultados de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-${{ matrix.project }}
+          path: laboratorio-mcp/${{ matrix.project }}/target/surefire-reports/
