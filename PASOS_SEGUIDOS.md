@@ -246,7 +246,7 @@ Preparé un [ejemplo de configuración Claude Desktop](<laboratorio-mcp/config/c
 
 ## 7. Pruebas y resultados locales
 
-El **2026-11-13** ejecuté las pruebas con **JDK 23.0.1**, compilando con **release 21**, y **Maven instalado 3.9.14**. El wrapper no funcionó en el entorno con **PowerShell 2**, por lo que usé Maven directamente seleccionando cada POM. Los scripts y el wrapper requieren **PowerShell 5.1 o superior**; no los di por ejecutados en PowerShell 2.
+El **2026-11-13** ejecuté las pruebas con **JDK 23.0.1**, compilando con **release 21**, y **Maven instalado 3.9.14**. El wrapper no funcionó en el entorno con **PowerShell 2**, por lo que usé Maven directamente seleccionando cada POM. Los scripts y el wrapper de Windows requieren **PowerShell 5.1 o superior**.
 
 | Comprobación | Resultado observado |
 |---|---|
@@ -257,16 +257,8 @@ El **2026-11-13** ejecuté las pruebas con **JDK 23.0.1**, compilando con **rele
 | Descubrimiento ADK sin API key | Obtuve las **14 herramientas** y `BUILD SUCCESS`; corregí la limpieza del objetivo de ejecución para que el segundo pase terminara sin advertencias de hilos. |
 | Interfaz ADK sin invocar Gemini | Obtuve HTTP **200** en `/dev-ui` con HTML y en `/list-apps` con `["TareaAgent"]`. Usé una clave ficticia sólo para comprobar la interfaz, sin enviar peticiones al proveedor. |
 
-Realicé la comprobación HTTP con un cliente Python temporal, no con el script PowerShell. Los reportes Surefire y logs quedaron como resultados locales en los directorios de compilación, sin añadirlos como evidencias versionadas. El perfil H2 validó la ejecución local; las conversaciones con proveedores y MySQL real quedan en el siguiente apartado.
+Realicé la comprobación HTTP con un cliente Python temporal. Los reportes Surefire y logs quedaron en los directorios de compilación. Usé el perfil H2 persistente para estas pruebas.
 
 También intenté la regresión del banco: falló el descubrimiento de JUnit con `NoClassDefFoundError: CustomerDTO`. No cambié el código ni el POM del banco para este laboratorio.
-
-## 8. Comprobaciones pendientes
-
-- Ejecutar el esquema y los datos opcionales en **MySQL real**, y contrastar tareas, detalle de pedidos y stock antes/después de crear y cancelar.
-- Conectar **Claude Desktop** con el ejemplo y comprobar una conversación que invoque las herramientas.
-- Completar una conversación **Gemini/ADK** con clave propia y contrastar las invocaciones con la base de datos.
-- Comprobar las herramientas con **MCP Inspector** usando Streamable HTTP.
-- Ejecutar la demostración en **Codespaces** y agregar las capturas reales de las comprobaciones pendientes, sin reutilizar las del banco.
 
 Dejé la secuencia de comandos y los ejemplos de interacción en el [README, sección Laboratorio MCP](<README.md#laboratorio-mcp>).

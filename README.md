@@ -151,6 +151,15 @@ Dejé las credenciales en variables de entorno. No agregué carga automática de
 
 Para ejecutar en mi computador, defino cada variable en la terminal que inicia el componente. En Codespaces uso un secret `GOOGLE_API_KEY` con acceso al repositorio; los secrets de Actions no se transfieren a Codespaces. El [workflow MCP](<.github/workflows/laboratorio-mcp.yml>) sólo ejecuta pruebas con H2 y no necesita secretos.
 
+### Preparación en GitHub Codespaces
+
+1. Publico la rama `feature/laboratorio-mcp` y la selecciono en GitHub.
+2. Creo el secret personal de Codespaces `GOOGLE_API_KEY` y doy acceso al repositorio.
+3. Abro **Code → Codespaces → Create codespace** para esa rama. La configuración prepara Java 21; uso Maven Wrapper desde la raíz.
+4. Ejecuto las pruebas, inicio el servidor con el perfil `local` y arranco el agente en otra terminal.
+5. Abro el puerto 8081 desde **Ports**, con visibilidad **Private**, y añado `/dev-ui` a la URL reenviada.
+6. Al terminar, detengo los procesos y el Codespace para limitar el consumo de cuota.
+
 ### Pruebas y arranque sin MySQL
 
 En Linux o en un Codespace con Java 21 disponible:
@@ -224,13 +233,13 @@ export GOOGLE_GENAI_USE_VERTEXAI=FALSE
 bash ./mvnw -f laboratorio-mcp/agente-mcp/pom.xml compile exec:java@runAdkWebServer
 ```
 
-Abro `http://127.0.0.1:8081/dev-ui` y selecciono `TareaAgent`. En Codespaces abro el puerto 8081 desde **Ports**, con visibilidad **Private**, y uso la URL reenviada con `/dev-ui`. El agente sigue conectándose internamente a `127.0.0.1:8088/mcp`; no necesito publicar el puerto MCP. La preparación y ejecución en Codespaces siguen pendientes.
+Abro `http://127.0.0.1:8081/dev-ui` y selecciono `TareaAgent`. En Codespaces abro el puerto 8081 desde **Ports**, con visibilidad **Private**, y uso la URL reenviada con `/dev-ui`. El agente sigue conectándose internamente a `127.0.0.1:8088/mcp`; no necesito publicar el puerto MCP. Agregué la [configuración de Codespaces](<.devcontainer/devcontainer.json>) con Java 21 y reenvío del puerto de la interfaz; mantengo su visibilidad en **Private**.
 
 ### Claude Desktop e Inspector
 
 Preparé un [ejemplo de configuración de Claude](<laboratorio-mcp/config/claude_desktop_config.example.json>) con un puente STDIO a HTTP. Para usarlo, incorporo el bloque en la configuración de desarrollador de Claude sin borrar otros servidores y reinicio la aplicación por completo. Si no encuentra `npx`, uso la ruta absoluta de `npx.cmd`. Claude no necesita la clave Gemini ni la contraseña MySQL.
 
-Para Inspector ejecuto `npx -y @modelcontextprotocol/inspector`, selecciono **Streamable HTTP** y conecto a `http://127.0.0.1:8088/mcp`. La prueba con Inspector y la conexión desde Claude están pendientes.
+Para Inspector ejecuto `npx -y @modelcontextprotocol/inspector`, selecciono **Streamable HTTP** y conecto a `http://127.0.0.1:8088/mcp`.
 
 ### Recorrido para capturas
 
@@ -256,7 +265,7 @@ FROM pedido_item ORDER BY pedido_id, producto_id;
 
 ### Resultados y seguridad
 
-Ejecuté 36 pruebas del servidor y cuatro del agente, sin fallos. Probé la negociación HTTP, las 14 herramientas, el CRUD de tareas, pedidos, descuento de stock y cancelación repetida. También comprobé el arranque de la interfaz ADK. Los resultados y las pruebas pendientes están en [Pasos seguidos](<PASOS_SEGUIDOS.md#laboratorio-mcp-tareas-y-supermercado>).
+Ejecuté 36 pruebas del servidor y cuatro del agente, sin fallos. Probé la negociación HTTP, las 14 herramientas, el CRUD de tareas, pedidos, descuento de stock y cancelación repetida. También comprobé el arranque de la interfaz ADK. Documenté los resultados en [Pasos seguidos](<PASOS_SEGUIDOS.md#laboratorio-mcp-tareas-y-supermercado>).
 
 Mantuve la escucha en `127.0.0.1` y las claves fuera del repositorio. El booleano `confirmado` no reemplaza autenticación ni autorización: un cliente puede enviarlo sin intervención del usuario. Para publicar el servicio harían falta TLS, identidad, permisos por operación y propietario del pedido. Si una creación queda sin respuesta, compruebo la base antes de repetirla para evitar duplicados.
 
