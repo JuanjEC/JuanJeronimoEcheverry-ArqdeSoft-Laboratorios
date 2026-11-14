@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "tareas-supermercado-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@0.16.6",
+        "http://127.0.0.1:8088/mcp",
+        "--allow-http",
+        "--transport",
+        "http-only"
+      ]
+    }
+  }
+}
